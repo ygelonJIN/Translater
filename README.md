@@ -65,10 +65,41 @@ Translater.app/Contents/MacOS/Translater --selftest in.md out.md
 ## 构建
 
 ```bash
-./build.sh
+./setup.sh
+open Translater.app
 ```
 
-签名使用钥匙串里的 Apple 开发证书（Team J7WK3943PY），保证更新后系统授权不失效。
+`setup.sh` 会自动完成：检查工具链 → 选签名身份 → 编译 → 签名。
+
+签名身份的选择顺序：
+
+1. 环境变量 `SIGN_IDENTITY`
+2. 已有的自签证书「Translater Local Signing」
+3. 钥匙串里任意一张可用的代码签名证书
+4. 都没有 → **现场生成一张自签证书**并导入登录钥匙串
+5. 导入失败 → 退回 ad-hoc 临时签名
+
+```bash
+./setup.sh --ad-hoc                          # 只用临时签名，不碰钥匙串
+SIGN_IDENTITY="证书名" ./setup.sh             # 指定证书
+```
+
+为什么要固定签名：ad-hoc 签名每次编译都会换哈希，系统按哈希认身份，
+屏幕录制等授权会每次失效。用固定身份（开发证书或自签证书）后，重编译不会再掉权限。
+
+## 给别人装
+
+对方需要 macOS 26+ 和 Xcode Command Line Tools（`xcode-select --install`）。
+
+```bash
+git clone https://github.com/ygelonJIN/Translater.git
+cd Translater
+./setup.sh
+open Translater.app
+```
+
+不需要 Apple 开发者账号：`setup.sh` 会给他生成一张属于他自己机器的自签证书，
+签名后应用能正常运行，系统授权在重编译后也能保留。
 
 ## 已知限制
 
