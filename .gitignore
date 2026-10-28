@@ -1,0 +1,7 @@
+.DS_Store
+.modcache/
+不推送/
+Translater.app/
+*.log
+*.txt
+*.png
